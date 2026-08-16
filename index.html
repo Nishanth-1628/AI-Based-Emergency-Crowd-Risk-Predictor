@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTRY — AI Crowd Risk Predictor</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="authShell" class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="brand-mark">◈</span>
+      <div>
+        <h2>SENTRY</h2>
+        <span>Secure Access</span>
+      </div>
+    </div>
+
+    <h3>Login to Monitoring Console</h3>
+    <form id="loginForm" class="auth-form">
+      <label>
+        Username
+        <input id="usernameInput" type="text" placeholder="Enter username" required>
+      </label>
+      <label>
+        Email
+        <input id="emailInput" type="email" placeholder="name@example.com" required>
+      </label>
+      <label>
+        Password
+        <input id="passwordInput" type="password" placeholder="Enter password" required>
+      </label>
+      <button type="submit" class="btn btn-primary auth-submit">Login to Dashboard</button>
+    </form>
+    <p id="authStatus" class="auth-status" aria-live="polite"></p>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◈</span>
+      <div class="brand-text">
+        <h1>SENTRY</h1>
+        <span>AI-Based Emergency Crowd Risk Predictor</span>
+      </div>
+    </div>
+
+    <div class="topbar-status">
+      <div class="status-item">
+        <span class="status-label">Feed</span>
+        <span class="status-value" id="feedState">STANDBY</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Overall Risk</span>
+        <span class="status-value" id="overallRisk">—</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Location</span>
+        <span class="status-value location-status" id="locationStatus">OFF</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Sim Clock</span>
+        <span class="status-value mono" id="simClock">00:00:00</span>
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <span class="user-pill" id="userBadge">Guest</span>
+      <button id="btnUseLocation" class="btn btn-ghost">📍 Use My Location</button>
+      <button id="btnStart" class="btn btn-primary">▶ Start Feed</button>
+      <button id="btnSurge" class="btn btn-warn">⚡ Trigger Surge</button>
+      <button id="btnReset" class="btn btn-ghost">⟲ Reset</button>
+      <button id="btnLogout" class="btn btn-ghost">↩ Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN GRID -->
+  <main class="grid">
+
+    <!-- MAP PANEL -->
+    <section class="panel panel-map">
+      <div class="panel-head">
+        <h2>Venue Map — Live Density</h2>
+        <span class="hint">Click the map to drop a new monitoring zone</span>
+      </div>
+      <div id="map"></div>
+      <div class="legend">
+        <span class="legend-item"><i class="dot low"></i>Low</span>
+        <span class="legend-item"><i class="dot medium"></i>Medium</span>
+        <span class="legend-item"><i class="dot high"></i>High</span>
+        <span class="legend-item"><i class="dot critical"></i>Critical</span>
+      </div>
+    </section>
+
+    <!-- ZONE LIST -->
+    <section class="panel panel-zones">
+      <div class="panel-head">
+        <h2>Monitored Zones</h2>
+        <span class="hint" id="zoneCount">0 zones</span>
+      </div>
+      <div id="zoneList" class="zone-list"></div>
+    </section>
+
+    <!-- TREND CHART -->
+    <section class="panel panel-chart">
+      <div class="panel-head">
+        <h2>Aggregate Risk Trend</h2>
+        <span class="hint">Last 40 readings</span>
+      </div>
+      <canvas id="trendChart"></canvas>
+    </section>
+
+    <!-- ALERT LOG -->
+    <section class="panel panel-alerts">
+      <div class="panel-head">
+        <h2>AI Alert Log</h2>
+        <span class="hint" id="alertCount">0 events</span>
+      </div>
+      <div id="alertLog" class="alert-log">
+        <div class="alert-empty">No alerts yet. Start the feed to begin monitoring.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>All predictions are generated client-side by a simulated heuristic AI engine — no data leaves the browser.</span>
+  </footer>
+
+</div>
+
+<!-- Zone creation modal -->
+<div id="zoneModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>New Monitoring Zone</h3>
+    <label>Zone name
+      <input type="text" id="zoneNameInput" placeholder="e.g. Gate C Concourse">
+    </label>
+    <label>Safe capacity (people)
+      <input type="number" id="zoneCapInput" value="500" min="10">
+    </label>
+    <div class="modal-actions">
+      <button id="zoneCancelBtn" class="btn btn-ghost">Cancel</button>
+      <button id="zoneCreateBtn" class="btn btn-primary">Create Zone</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script src="js/zones.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/map.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
