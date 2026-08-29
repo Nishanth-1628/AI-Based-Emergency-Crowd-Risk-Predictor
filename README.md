@@ -4,8 +4,6 @@ AI-Powered Crowd Safety Monitoring & Emergency Risk Prediction Dashboard
 
 
 
-
-
 AI-Based Emergency Crowd Risk Predictor is a browser-based command-center dashboard designed to simulate intelligent crowd-safety monitoring in high-density environments. The system analyzes crowd density, growth rate, and bottleneck conditions to calculate risk levels, generate alerts, and visualize crowd-risk trends in real time.
 
 📌 Overview
