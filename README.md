@@ -17,7 +17,7 @@ The AI-Based Emergency Crowd Risk Predictor demonstrates how an intelligent moni
 The current implementation is a front-end prototype. It runs entirely in the browser and uses a simulated live sensor feed to demonstrate the concept.
 
 🎯 Problem Statement
-
+  
 Crowd-related emergencies can occur due to:
 
 Excessive crowd density
